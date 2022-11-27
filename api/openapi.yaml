@@ -1,0 +1,390 @@
+openapi: 3.0.2
+info:
+  title: Reading Tracker
+  version: 1.0.0
+  description: API for a book reading tracker app
+  contact:
+    name: Cleyson Lima
+    email: cleysonph@gmail.com
+servers:
+  - url: http://localhost:8000
+    description: Local Server
+tags:
+  - name: Books
+    description: Books management
+paths:
+  /api/v1/books:
+    get:
+      tags:
+        - Books
+      summary: Get all books
+      description: Get all books
+      operationId: getBooks
+      parameters:
+        - name: q
+          in: query
+          description: Search Query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#components/schemas/BookSummaryResponse"
+    post:
+      tags:
+        - Books
+      summary: Create a book
+      description: Create a book
+      operationId: createBook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#components/schemas/BookRequest"
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/BookResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/ValidationErrorResponse"
+  /api/v1/books/{bookId}:
+    get:
+      tags:
+        - Books
+      summary: Get a book
+      description: Get a book
+      operationId: getBook
+      parameters:
+        - name: bookId
+          in: path
+          description: Book ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/BookResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/ErrorResponse"
+    delete:
+      tags:
+        - Books
+      summary: Delete a book
+      description: Delete a book
+      operationId: deleteBook
+      parameters:
+        - name: bookId
+          in: path
+          description: Book ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/ErrorResponse"
+    put:
+      tags:
+        - Books
+      summary: Update a book
+      description: Update a book
+      operationId: updateBook
+      parameters:
+        - name: bookId
+          in: path
+          description: Book ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#components/schemas/BookRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/BookResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/ValidationErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/ErrorResponse"
+components:
+  schemas:
+    BookSummaryResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        title:
+          type: string
+          example: The Lord of the Rings
+        subtitle:
+          type: string
+          example: The Fellowship of the Ring
+        authors:
+          type: array
+          items:
+            type: string
+          example:
+            - J. J. R. Tolkien
+        cover:
+          type: string
+          format: uri
+          example: https://covers.openlibrary.org/b/id/10977514-L.jpg
+        pages:
+          type: integer
+          format: int64
+          example: 423
+        read_pages:
+          type: integer
+          format: int64
+          example: 0
+        reading_status:
+          type: string
+          enum:
+            - reading
+            - read
+            - to-read
+          example: reading
+    BookResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        title:
+          type: string
+          example: The Lord of the Rings
+        subtitle:
+          type: string
+          example: The Fellowship of the Ring
+        isbn:
+          type: string
+          example: "9783161484100"
+        authors:
+          type: array
+          items:
+            type: string
+          example:
+            - J. J. R. Tolkien
+        categories:
+          type: array
+          items:
+            type: string
+          example:
+            - Fiction
+            - Fantasy
+        language:
+          type: string
+          enum:
+            - pt
+            - en
+        cover:
+          type: string
+          format: uri
+          example: https://covers.openlibrary.org/b/id/10977514-L.jpg
+        publisher:
+          type: string
+          example: Allen & Unwin
+        published_at:
+          type: string
+          format: date
+          example: 1954-07-29
+        pages:
+          type: integer
+          format: int64
+          example: 423
+        read_pages:
+          type: integer
+          format: int64
+          example: 0
+        description:
+          type: string
+          example: The Lord of the Rings is an epic high fantasy novel written by English author and scholar J. R. R. Tolkien. The story began as a sequel to Tolkien's 1937 fantasy novel The Hobbit, but eventually developed into a much larger work. Written in stages between 1937 and 1949, The Lord of the Rings is one of the best-selling novels ever written, with over 150 million copies sold.
+        reading_status:
+          type: string
+          enum:
+            - reading
+            - read
+            - to-read
+          example: reading
+        edition:
+          type: integer
+          format: int32
+          example: 1
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int64
+          example: 404
+        error:
+          type: string
+          example: Not Found
+        message:
+          type: string
+          example: Book not found
+        cause:
+          type: string
+          example: BookNotFoundError
+        path:
+          type: string
+          example: /api/v1/books/1
+        timestamp:
+          type: string
+          format: date-time
+          example: 2021-03-01T00:00:00.000Z
+    ValidationErrorResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int64
+          example: 404
+        error:
+          type: string
+          example: Not Found
+        message:
+          type: string
+          example: Book not found
+        cause:
+          type: string
+          example: BookNotFoundError
+        path:
+          type: string
+          example: /api/v1/books/1
+        timestamp:
+          type: string
+          format: date-time
+          example: 2021-03-01T00:00:00.000Z
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          example:
+            title:
+              - Title is required
+            authors:
+              - Authors is required
+    BookRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          example: The Lord of the Rings
+          minLength: 3
+          maxLength: 255
+        subtitle:
+          type: string
+          example: The Fellowship of the Ring
+          minLength: 3
+          maxLength: 255
+        isbn:
+          type: string
+          example: "9783161484100"
+          minLength: 10
+          maxLength: 13
+        authors:
+          type: array
+          items:
+            type: string
+            minLength: 3
+            maxLength: 255
+          example:
+            - J. J. R. Tolkien
+          minItems: 1
+        categories:
+          type: array
+          items:
+            type: string
+            minLength: 3
+            maxLength: 100
+          example:
+            - Fiction
+            - Fantasy
+          minItems: 1
+        language:
+          type: string
+          enum:
+            - pt
+            - en
+        publisher:
+          type: string
+          example: Allen & Unwin
+          minLength: 3
+          maxLength: 100
+        published_at:
+          type: string
+          format: date
+          example: 1954-07-29
+        pages:
+          type: integer
+          format: int64
+          example: 423
+          minimum: 1
+        description:
+          type: string
+          example: The Lord of the Rings is an epic high fantasy novel written by English author and scholar J. R. R. Tolkien. The story began as a sequel to Tolkien's 1937 fantasy novel The Hobbit, but eventually developed into a much larger work. Written in stages between 1937 and 1949, The Lord of the Rings is one of the best-selling novels ever written, with over 150 million copies sold.
+          minLength: 3
+          maxLength: 1000
+        edition:
+          type: integer
+          format: int32
+          example: 1
+          minimum: 1
+      required:
+        - title
+        - isbn
+        - authors
+        - categories
+        - language
+        - pages
