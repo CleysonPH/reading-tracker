@@ -10,11 +10,182 @@ servers:
   - url: http://localhost:8000
     description: Local Server
 tags:
+  - name: Me
+    description: User information
+  - name: Auth
+    description: Authentication
   - name: Books
     description: Books management
   - name: Reading Sessions
     description: Reading sessions management
 paths:
+  /api/v1/me:
+    get:
+      tags:
+        - Me
+      summary: Get user information
+      description: Get user information
+      operationId: getMe
+      security:
+        - JWT: []
+      responses:
+        "200":
+          description: User information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                status: 401
+                error: Unauthorized
+                message: Ivalid token
+                cause: UnauthorizedError
+                path: /api/v1/auth/refresh
+                timestamp: 2020-10-10T00:00:00.000Z
+  /api/v1/auth/register:
+    post:
+      tags:
+        - Auth
+      summary: Register a new user
+      operationId: registerUser
+      requestBody:
+        description: User to register
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+              example:
+                status: 400
+                error: Bad request
+                message: Validation failed
+                cause: ValidationError
+                path: /api/v1/auth/register
+                timestamp: 2020-10-10T00:00:00.000Z
+                errors:
+                  first_name:
+                    - is required
+                  password_confirmation:
+                    - must be equal to password
+  /api/v1/auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Login a user
+      operationId: loginUser
+      requestBody:
+        description: User to login
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: User logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+              example:
+                status: 400
+                error: Bad request
+                message: Validation failed
+                cause: ValidationError
+                path: /api/v1/auth/login
+                timestamp: 2020-10-10T00:00:00.000Z
+                errors:
+                  email:
+                    - is required
+                  password:
+                    - is required
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                status: 401
+                error: Unauthorized
+                message: Invalid credentials
+                cause: UnauthorizedError
+                path: /api/v1/auth/refresh
+                timestamp: 2020-10-10T00:00:00.000Z
+  /api/v1/auth/refresh:
+    post:
+      tags:
+        - Auth
+      summary: Refresh a user token
+      operationId: refreshToken
+      requestBody:
+        description: User to refresh token
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshRequest"
+      responses:
+        "200":
+          description: User token refreshed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+              example:
+                status: 400
+                error: Bad request
+                message: Validation failed
+                cause: ValidationError
+                path: /api/v1/auth/refresh
+                timestamp: 2020-10-10T00:00:00.000Z
+                errors:
+                  refresh_token:
+                    - is required
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                status: 401
+                error: Unauthorized
+                message: Ivalid token
+                cause: UnauthorizedError
+                path: /api/v1/auth/refresh
+                timestamp: 2020-10-10T00:00:00.000Z
   /api/v1/books:
     get:
       tags:
@@ -29,6 +200,8 @@ paths:
           required: false
           schema:
             type: string
+      security:
+        - JWT: []
       responses:
         "200":
           description: OK
@@ -38,6 +211,19 @@ paths:
                 type: array
                 items:
                   $ref: "#components/schemas/BookSummaryResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                status: 401
+                error: Unauthorized
+                message: Ivalid token
+                cause: UnauthorizedError
+                path: /api/v1/auth/refresh
+                timestamp: 2020-10-10T00:00:00.000Z
     post:
       tags:
         - Books
@@ -50,6 +236,8 @@ paths:
             schema:
               $ref: "#components/schemas/BookRequest"
         required: true
+      security:
+        - JWT: []
       responses:
         "201":
           description: Created
@@ -63,6 +251,19 @@ paths:
             application/json:
               schema:
                 $ref: "#components/schemas/ValidationErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                status: 401
+                error: Unauthorized
+                message: Ivalid token
+                cause: UnauthorizedError
+                path: /api/v1/auth/refresh
+                timestamp: 2020-10-10T00:00:00.000Z
   /api/v1/books/{bookId}:
     get:
       tags:
@@ -78,6 +279,8 @@ paths:
           schema:
             type: integer
             format: int64
+      security:
+        - JWT: []
       responses:
         "200":
           description: OK
@@ -85,6 +288,19 @@ paths:
             application/json:
               schema:
                 $ref: "#components/schemas/BookResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                status: 401
+                error: Unauthorized
+                message: Ivalid token
+                cause: UnauthorizedError
+                path: /api/v1/auth/refresh
+                timestamp: 2020-10-10T00:00:00.000Z
         "404":
           description: Not Found
           content:
@@ -105,9 +321,24 @@ paths:
           schema:
             type: integer
             format: int64
+      security:
+        - JWT: []
       responses:
         "204":
           description: No Content
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                status: 401
+                error: Unauthorized
+                message: Ivalid token
+                cause: UnauthorizedError
+                path: /api/v1/auth/refresh
+                timestamp: 2020-10-10T00:00:00.000Z
         "404":
           description: Not Found
           content:
@@ -128,6 +359,8 @@ paths:
           schema:
             type: integer
             format: int64
+      security:
+        - JWT: []
       requestBody:
         content:
           application/json:
@@ -147,6 +380,19 @@ paths:
             application/json:
               schema:
                 $ref: "#components/schemas/ValidationErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                status: 401
+                error: Unauthorized
+                message: Ivalid token
+                cause: UnauthorizedError
+                path: /api/v1/auth/refresh
+                timestamp: 2020-10-10T00:00:00.000Z
         "404":
           description: Not Found
           content:
@@ -168,6 +414,8 @@ paths:
           schema:
             type: integer
             format: int64
+      security:
+        - JWT: []
       requestBody:
         content:
           application/json:
@@ -197,6 +445,19 @@ paths:
                 errors:
                   read_pages:
                     - This value should not be blank.
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                status: 401
+                error: Unauthorized
+                message: Ivalid token
+                cause: UnauthorizedError
+                path: /api/v1/auth/refresh
+                timestamp: 2020-10-10T00:00:00.000Z
         "404":
           description: Not Found
           content:
@@ -224,6 +485,8 @@ paths:
           schema:
             type: integer
             format: int64
+      security:
+        - JWT: []
       responses:
         "200":
           description: OK
@@ -233,6 +496,19 @@ paths:
                 type: array
                 items:
                   $ref: "#components/schemas/ReadingSessionResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                status: 401
+                error: Unauthorized
+                message: Ivalid token
+                cause: UnauthorizedError
+                path: /api/v1/auth/refresh
+                timestamp: 2020-10-10T00:00:00.000Z
         "404":
           description: Not Found
           content:
@@ -268,6 +544,8 @@ paths:
           schema:
             type: integer
             format: int64
+      security:
+        - JWT: []
       requestBody:
         content:
           application/json:
@@ -297,6 +575,19 @@ paths:
                 errors:
                   read_pages:
                     - This value should not be blank.
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                status: 401
+                error: Unauthorized
+                message: Ivalid token
+                cause: UnauthorizedError
+                path: /api/v1/auth/refresh
+                timestamp: 2020-10-10T00:00:00.000Z
         "404":
           description: Not Found
           content:
@@ -577,3 +868,85 @@ components:
           type: integer
           format: int64
           example: 1
+    RegisterRequest:
+      type: object
+      properties:
+        first_name:
+          type: string
+          example: John
+          minLength: 3
+          maxLength: 255
+        last_name:
+          type: string
+          example: Doe
+          minLength: 3
+          maxLength: 255
+        email:
+          type: string
+          example: johndoe@mail.com
+          minLength: 3
+          maxLength: 255
+        password:
+          type: string
+          example: 123456
+          minLength: 6
+          maxLength: 255
+        password_confirmation:
+          type: string
+          example: 123456
+          minLength: 6
+          maxLength: 255
+      required:
+        - first_name
+        - last_name
+        - email
+        - password
+        - password_confirmation
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        first_name:
+          type: string
+          example: John
+        last_name:
+          type: string
+          example: Doe
+        email:
+          type: string
+          example: johndoe@mail.com
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          example: johndue@mail.com
+        password:
+          type: string
+          format: password
+          example: 123456
+    TokenResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+        refresh_token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+        token_type:
+          type: string
+          example: Bearer
+    RefreshRequest:
+      type: object
+      properties:
+        refresh_token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+  securitySchemes:
+    JWT:
+      type: http
+      scheme: bearer
