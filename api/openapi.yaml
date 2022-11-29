@@ -12,6 +12,8 @@ servers:
 tags:
   - name: Books
     description: Books management
+  - name: Reading Sessions
+    description: Reading sessions management
 paths:
   /api/v1/books:
     get:
@@ -151,6 +153,163 @@ paths:
             application/json:
               schema:
                 $ref: "#components/schemas/ErrorResponse"
+  /api/v1/books/{bookId}/sessions:
+    post:
+      tags:
+        - Reading Sessions
+      summary: Create a reading session
+      description: Create a reading session
+      operationId: createReadingSession
+      parameters:
+        - name: bookId
+          in: path
+          description: Book ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#components/schemas/ReadingSessionRequest"
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/ReadingSessionResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/ValidationErrorResponse"
+              example:
+                status: 400
+                error: Bad Request
+                message: Validation failed
+                cause: ValidationError
+                path: /api/v1/books/1/sessions
+                timestamp: 2021-03-01T00:00:00.000Z
+                errors:
+                  read_pages:
+                    - This value should not be blank.
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/ErrorResponse"
+              example:
+                status: 404
+                error: Not Found
+                message: Book not found
+                cause: BookNotFoundError
+                path: /api/v1/books/1/sessions
+                timestamp: 2021-03-01T00:00:00.000Z
+    get:
+      tags:
+        - Reading Sessions
+      summary: Get all reading sessions
+      description: Get all reading sessions
+      operationId: getReadingSessions
+      parameters:
+        - name: bookId
+          in: path
+          description: Book ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#components/schemas/ReadingSessionResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/ErrorResponse"
+              example:
+                status: 404
+                error: Not Found
+                message: Book not found
+                cause: BookNotFoundError
+                path: /api/v1/books/1/sessions
+                timestamp: 2021-03-01T00:00:00.000Z
+  /api/v1/books/{bookId}/sessions/{sessionId}:
+    put:
+      tags:
+        - Reading Sessions
+      summary: Update a reading session
+      description: Update a reading session
+      operationId: updateReadingSession
+      parameters:
+        - name: bookId
+          in: path
+          description: Book ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: sessionId
+          in: path
+          description: Session ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#components/schemas/ReadingSessionRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/ReadingSessionResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/ValidationErrorResponse"
+              example:
+                status: 400
+                error: Bad Request
+                message: Validation failed
+                cause: ValidationError
+                path: /api/v1/books/1/sessions
+                timestamp: 2021-03-01T00:00:00.000Z
+                errors:
+                  read_pages:
+                    - This value should not be blank.
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/ErrorResponse"
+              example:
+                status: 404
+                error: Not Found
+                message: Reading session not found
+                cause: ReadingSessionNotFoundError
+                path: /api/v1/books/1/sessions/1
+                timestamp: 2021-03-01T00:00:00.000Z
 components:
   schemas:
     BookSummaryResponse:
@@ -287,16 +446,16 @@ components:
         status:
           type: integer
           format: int64
-          example: 404
+          example: 400
         error:
           type: string
-          example: Not Found
+          example: Bad Request
         message:
           type: string
-          example: Book not found
+          example: Validation failed
         cause:
           type: string
-          example: BookNotFoundError
+          example: ValidationError
         path:
           type: string
           example: /api/v1/books/1
@@ -388,3 +547,33 @@ components:
         - categories
         - language
         - pages
+    ReadingSessionRequest:
+      type: object
+      properties:
+        read_pages:
+          type: integer
+          format: int64
+          example: 100
+          minimum: 1
+      required:
+        - read_pages
+        - reading_status
+    ReadingSessionResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        read_pages:
+          type: integer
+          format: int64
+          example: 100
+        date:
+          type: string
+          format: date-time
+          example: 2021-03-01T00:00:00.000Z
+        book_id:
+          type: integer
+          format: int64
+          example: 1
