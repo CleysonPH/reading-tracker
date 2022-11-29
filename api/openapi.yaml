@@ -1,0 +1,1029 @@
+openapi: 3.0.2
+info:
+  title: Reading Tracker
+  version: 1.0.0
+  description: API for a book reading tracker app
+  contact:
+    name: Cleyson Lima
+    email: cleysonph@gmail.com
+servers:
+  - url: http://localhost:8000
+    description: Local Server
+tags:
+  - name: Me
+    description: User information
+  - name: Auth
+    description: Authentication
+  - name: Books
+    description: Books management
+  - name: Reading Sessions
+    description: Reading sessions management
+  - name: Metrics
+    description: Metrics
+paths:
+  /api/v1/me:
+    get:
+      tags:
+        - Me
+      summary: Get user information
+      description: Get user information
+      operationId: getMe
+      security:
+        - JWT: []
+      responses:
+        "200":
+          description: User information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                status: 401
+                error: Unauthorized
+                message: Ivalid token
+                cause: UnauthorizedError
+                path: /api/v1/auth/refresh
+                timestamp: 2020-10-10T00:00:00.000Z
+  /api/v1/auth/register:
+    post:
+      tags:
+        - Auth
+      summary: Register a new user
+      operationId: registerUser
+      requestBody:
+        description: User to register
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+              example:
+                status: 400
+                error: Bad request
+                message: Validation failed
+                cause: ValidationError
+                path: /api/v1/auth/register
+                timestamp: 2020-10-10T00:00:00.000Z
+                errors:
+                  first_name:
+                    - is required
+                  password_confirmation:
+                    - must be equal to password
+  /api/v1/auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Login a user
+      operationId: loginUser
+      requestBody:
+        description: User to login
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: User logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+              example:
+                status: 400
+                error: Bad request
+                message: Validation failed
+                cause: ValidationError
+                path: /api/v1/auth/login
+                timestamp: 2020-10-10T00:00:00.000Z
+                errors:
+                  email:
+                    - is required
+                  password:
+                    - is required
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                status: 401
+                error: Unauthorized
+                message: Invalid credentials
+                cause: UnauthorizedError
+                path: /api/v1/auth/refresh
+                timestamp: 2020-10-10T00:00:00.000Z
+  /api/v1/auth/refresh:
+    post:
+      tags:
+        - Auth
+      summary: Refresh a user token
+      operationId: refreshToken
+      requestBody:
+        description: User to refresh token
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshRequest"
+      responses:
+        "200":
+          description: User token refreshed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+              example:
+                status: 400
+                error: Bad request
+                message: Validation failed
+                cause: ValidationError
+                path: /api/v1/auth/refresh
+                timestamp: 2020-10-10T00:00:00.000Z
+                errors:
+                  refresh_token:
+                    - is required
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                status: 401
+                error: Unauthorized
+                message: Ivalid token
+                cause: UnauthorizedError
+                path: /api/v1/auth/refresh
+                timestamp: 2020-10-10T00:00:00.000Z
+  /api/v1/books:
+    get:
+      tags:
+        - Books
+      summary: Get all books
+      description: Get all books
+      operationId: getBooks
+      parameters:
+        - name: q
+          in: query
+          description: Search Query
+          required: false
+          schema:
+            type: string
+      security:
+        - JWT: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#components/schemas/BookSummaryResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                status: 401
+                error: Unauthorized
+                message: Ivalid token
+                cause: UnauthorizedError
+                path: /api/v1/auth/refresh
+                timestamp: 2020-10-10T00:00:00.000Z
+    post:
+      tags:
+        - Books
+      summary: Create a book
+      description: Create a book
+      operationId: createBook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#components/schemas/BookRequest"
+        required: true
+      security:
+        - JWT: []
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/BookResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/ValidationErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                status: 401
+                error: Unauthorized
+                message: Ivalid token
+                cause: UnauthorizedError
+                path: /api/v1/auth/refresh
+                timestamp: 2020-10-10T00:00:00.000Z
+  /api/v1/books/{bookId}:
+    get:
+      tags:
+        - Books
+      summary: Get a book
+      description: Get a book
+      operationId: getBook
+      parameters:
+        - name: bookId
+          in: path
+          description: Book ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      security:
+        - JWT: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/BookResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                status: 401
+                error: Unauthorized
+                message: Ivalid token
+                cause: UnauthorizedError
+                path: /api/v1/auth/refresh
+                timestamp: 2020-10-10T00:00:00.000Z
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/ErrorResponse"
+    delete:
+      tags:
+        - Books
+      summary: Delete a book
+      description: Delete a book
+      operationId: deleteBook
+      parameters:
+        - name: bookId
+          in: path
+          description: Book ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      security:
+        - JWT: []
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                status: 401
+                error: Unauthorized
+                message: Ivalid token
+                cause: UnauthorizedError
+                path: /api/v1/auth/refresh
+                timestamp: 2020-10-10T00:00:00.000Z
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/ErrorResponse"
+    put:
+      tags:
+        - Books
+      summary: Update a book
+      description: Update a book
+      operationId: updateBook
+      parameters:
+        - name: bookId
+          in: path
+          description: Book ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      security:
+        - JWT: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#components/schemas/BookRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/BookResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/ValidationErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                status: 401
+                error: Unauthorized
+                message: Ivalid token
+                cause: UnauthorizedError
+                path: /api/v1/auth/refresh
+                timestamp: 2020-10-10T00:00:00.000Z
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/ErrorResponse"
+  /api/v1/books/{bookId}/sessions:
+    post:
+      tags:
+        - Reading Sessions
+      summary: Create a reading session
+      description: Create a reading session
+      operationId: createReadingSession
+      parameters:
+        - name: bookId
+          in: path
+          description: Book ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      security:
+        - JWT: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#components/schemas/ReadingSessionRequest"
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/ReadingSessionResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/ValidationErrorResponse"
+              example:
+                status: 400
+                error: Bad Request
+                message: Validation failed
+                cause: ValidationError
+                path: /api/v1/books/1/sessions
+                timestamp: 2021-03-01T00:00:00.000Z
+                errors:
+                  read_pages:
+                    - This value should not be blank.
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                status: 401
+                error: Unauthorized
+                message: Ivalid token
+                cause: UnauthorizedError
+                path: /api/v1/auth/refresh
+                timestamp: 2020-10-10T00:00:00.000Z
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/ErrorResponse"
+              example:
+                status: 404
+                error: Not Found
+                message: Book not found
+                cause: BookNotFoundError
+                path: /api/v1/books/1/sessions
+                timestamp: 2021-03-01T00:00:00.000Z
+    get:
+      tags:
+        - Reading Sessions
+      summary: Get all reading sessions
+      description: Get all reading sessions
+      operationId: getReadingSessions
+      parameters:
+        - name: bookId
+          in: path
+          description: Book ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      security:
+        - JWT: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#components/schemas/ReadingSessionResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                status: 401
+                error: Unauthorized
+                message: Ivalid token
+                cause: UnauthorizedError
+                path: /api/v1/auth/refresh
+                timestamp: 2020-10-10T00:00:00.000Z
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/ErrorResponse"
+              example:
+                status: 404
+                error: Not Found
+                message: Book not found
+                cause: BookNotFoundError
+                path: /api/v1/books/1/sessions
+                timestamp: 2021-03-01T00:00:00.000Z
+  /api/v1/books/{bookId}/sessions/{sessionId}:
+    put:
+      tags:
+        - Reading Sessions
+      summary: Update a reading session
+      description: Update a reading session
+      operationId: updateReadingSession
+      parameters:
+        - name: bookId
+          in: path
+          description: Book ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: sessionId
+          in: path
+          description: Session ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      security:
+        - JWT: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#components/schemas/ReadingSessionRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/ReadingSessionResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/ValidationErrorResponse"
+              example:
+                status: 400
+                error: Bad Request
+                message: Validation failed
+                cause: ValidationError
+                path: /api/v1/books/1/sessions
+                timestamp: 2021-03-01T00:00:00.000Z
+                errors:
+                  read_pages:
+                    - This value should not be blank.
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                status: 401
+                error: Unauthorized
+                message: Ivalid token
+                cause: UnauthorizedError
+                path: /api/v1/auth/refresh
+                timestamp: 2020-10-10T00:00:00.000Z
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/ErrorResponse"
+              example:
+                status: 404
+                error: Not Found
+                message: Reading session not found
+                cause: ReadingSessionNotFoundError
+                path: /api/v1/books/1/sessions/1
+                timestamp: 2021-03-01T00:00:00.000Z
+  /api/v1/metrics:
+    get:
+      tags:
+        - Metrics
+      summary: Get metrics
+      description: Get metrics
+      operationId: getMetrics
+      parameters:
+        - name: start_date
+          in: query
+          description: Start date
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: end_date
+          in: query
+          description: End date
+          required: true
+          schema:
+            type: string
+            format: date
+      security:
+        - JWT: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/MetricsResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/ValidationErrorResponse"
+              example:
+                status: 400
+                error: Bad Request
+                message: Validation failed
+                cause: ValidationError
+                path: /api/v1/metrics
+                timestamp: 2021-03-01T00:00:00.000Z
+                errors:
+                  end_date:
+                    - Must be greater than start_date
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                status: 401
+                error: Unauthorized
+                message: Ivalid token
+                cause: UnauthorizedError
+                path: /api/v1/auth/refresh
+                timestamp: 2020-10-10T00:00:00.000Z
+components:
+  schemas:
+    BookSummaryResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        title:
+          type: string
+          example: The Lord of the Rings
+        subtitle:
+          type: string
+          example: The Fellowship of the Ring
+        authors:
+          type: array
+          items:
+            type: string
+          example:
+            - J. J. R. Tolkien
+        cover:
+          type: string
+          format: uri
+          example: https://covers.openlibrary.org/b/id/10977514-L.jpg
+        pages:
+          type: integer
+          format: int64
+          example: 423
+        read_pages:
+          type: integer
+          format: int64
+          example: 0
+        reading_status:
+          type: string
+          enum:
+            - reading
+            - read
+            - to-read
+          example: reading
+    BookResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        title:
+          type: string
+          example: The Lord of the Rings
+        subtitle:
+          type: string
+          example: The Fellowship of the Ring
+        isbn:
+          type: string
+          example: "9783161484100"
+        authors:
+          type: array
+          items:
+            type: string
+          example:
+            - J. J. R. Tolkien
+        categories:
+          type: array
+          items:
+            type: string
+          example:
+            - Fiction
+            - Fantasy
+        language:
+          type: string
+          enum:
+            - pt
+            - en
+        cover:
+          type: string
+          format: uri
+          example: https://covers.openlibrary.org/b/id/10977514-L.jpg
+        publisher:
+          type: string
+          example: Allen & Unwin
+        published_at:
+          type: string
+          format: date
+          example: 1954-07-29
+        pages:
+          type: integer
+          format: int64
+          example: 423
+        read_pages:
+          type: integer
+          format: int64
+          example: 0
+        description:
+          type: string
+          example: The Lord of the Rings is an epic high fantasy novel written by English author and scholar J. R. R. Tolkien. The story began as a sequel to Tolkien's 1937 fantasy novel The Hobbit, but eventually developed into a much larger work. Written in stages between 1937 and 1949, The Lord of the Rings is one of the best-selling novels ever written, with over 150 million copies sold.
+        reading_status:
+          type: string
+          enum:
+            - reading
+            - read
+            - to-read
+          example: reading
+        edition:
+          type: integer
+          format: int32
+          example: 1
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int64
+          example: 404
+        error:
+          type: string
+          example: Not Found
+        message:
+          type: string
+          example: Book not found
+        cause:
+          type: string
+          example: BookNotFoundError
+        path:
+          type: string
+          example: /api/v1/books/1
+        timestamp:
+          type: string
+          format: date-time
+          example: 2021-03-01T00:00:00.000Z
+    ValidationErrorResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int64
+          example: 400
+        error:
+          type: string
+          example: Bad Request
+        message:
+          type: string
+          example: Validation failed
+        cause:
+          type: string
+          example: ValidationError
+        path:
+          type: string
+          example: /api/v1/books/1
+        timestamp:
+          type: string
+          format: date-time
+          example: 2021-03-01T00:00:00.000Z
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          example:
+            title:
+              - Title is required
+            authors:
+              - Authors is required
+    BookRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          example: The Lord of the Rings
+          minLength: 3
+          maxLength: 255
+        subtitle:
+          type: string
+          example: The Fellowship of the Ring
+          minLength: 3
+          maxLength: 255
+        isbn:
+          type: string
+          example: "9783161484100"
+          minLength: 10
+          maxLength: 13
+        authors:
+          type: array
+          items:
+            type: string
+            minLength: 3
+            maxLength: 255
+          example:
+            - J. J. R. Tolkien
+          minItems: 1
+        categories:
+          type: array
+          items:
+            type: string
+            minLength: 3
+            maxLength: 100
+          example:
+            - Fiction
+            - Fantasy
+          minItems: 1
+        language:
+          type: string
+          enum:
+            - pt
+            - en
+        publisher:
+          type: string
+          example: Allen & Unwin
+          minLength: 3
+          maxLength: 100
+        published_at:
+          type: string
+          format: date
+          example: 1954-07-29
+        pages:
+          type: integer
+          format: int64
+          example: 423
+          minimum: 1
+        description:
+          type: string
+          example: The Lord of the Rings is an epic high fantasy novel written by English author and scholar J. R. R. Tolkien. The story began as a sequel to Tolkien's 1937 fantasy novel The Hobbit, but eventually developed into a much larger work. Written in stages between 1937 and 1949, The Lord of the Rings is one of the best-selling novels ever written, with over 150 million copies sold.
+          minLength: 3
+          maxLength: 1000
+        edition:
+          type: integer
+          format: int32
+          example: 1
+          minimum: 1
+      required:
+        - title
+        - isbn
+        - authors
+        - categories
+        - language
+        - pages
+    ReadingSessionRequest:
+      type: object
+      properties:
+        read_pages:
+          type: integer
+          format: int64
+          example: 100
+          minimum: 1
+      required:
+        - read_pages
+        - reading_status
+    ReadingSessionResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        read_pages:
+          type: integer
+          format: int64
+          example: 100
+        date:
+          type: string
+          format: date-time
+          example: 2021-03-01T00:00:00.000Z
+        book_id:
+          type: integer
+          format: int64
+          example: 1
+    RegisterRequest:
+      type: object
+      properties:
+        first_name:
+          type: string
+          example: John
+          minLength: 3
+          maxLength: 255
+        last_name:
+          type: string
+          example: Doe
+          minLength: 3
+          maxLength: 255
+        email:
+          type: string
+          example: johndoe@mail.com
+          minLength: 3
+          maxLength: 255
+        password:
+          type: string
+          example: 123456
+          minLength: 6
+          maxLength: 255
+        password_confirmation:
+          type: string
+          example: 123456
+          minLength: 6
+          maxLength: 255
+      required:
+        - first_name
+        - last_name
+        - email
+        - password
+        - password_confirmation
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        first_name:
+          type: string
+          example: John
+        last_name:
+          type: string
+          example: Doe
+        email:
+          type: string
+          example: johndoe@mail.com
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          example: johndue@mail.com
+        password:
+          type: string
+          format: password
+          example: 123456
+    TokenResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+        refresh_token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+        token_type:
+          type: string
+          example: Bearer
+    RefreshRequest:
+      type: object
+      properties:
+        refresh_token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+    MetricsResponse:
+      type: object
+      properties:
+        total_books:
+          type: integer
+          format: int64
+          example: 1
+        total_pages:
+          type: integer
+          format: int64
+          example: 100
+        total_reading_sessions:
+          type: integer
+          format: int64
+          example: 1
+  securitySchemes:
+    JWT:
+      type: http
+      scheme: bearer
