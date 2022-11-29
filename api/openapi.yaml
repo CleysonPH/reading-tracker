@@ -18,6 +18,8 @@ tags:
     description: Books management
   - name: Reading Sessions
     description: Reading sessions management
+  - name: Metrics
+    description: Metrics
 paths:
   /api/v1/me:
     get:
@@ -601,6 +603,66 @@ paths:
                 cause: ReadingSessionNotFoundError
                 path: /api/v1/books/1/sessions/1
                 timestamp: 2021-03-01T00:00:00.000Z
+  /api/v1/metrics:
+    get:
+      tags:
+        - Metrics
+      summary: Get metrics
+      description: Get metrics
+      operationId: getMetrics
+      parameters:
+        - name: start_date
+          in: query
+          description: Start date
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: end_date
+          in: query
+          description: End date
+          required: true
+          schema:
+            type: string
+            format: date
+      security:
+        - JWT: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/MetricsResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/ValidationErrorResponse"
+              example:
+                status: 400
+                error: Bad Request
+                message: Validation failed
+                cause: ValidationError
+                path: /api/v1/metrics
+                timestamp: 2021-03-01T00:00:00.000Z
+                errors:
+                  end_date:
+                    - Must be greater than start_date
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                status: 401
+                error: Unauthorized
+                message: Ivalid token
+                cause: UnauthorizedError
+                path: /api/v1/auth/refresh
+                timestamp: 2020-10-10T00:00:00.000Z
 components:
   schemas:
     BookSummaryResponse:
@@ -946,6 +1008,21 @@ components:
         refresh_token:
           type: string
           example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+    MetricsResponse:
+      type: object
+      properties:
+        total_books:
+          type: integer
+          format: int64
+          example: 1
+        total_pages:
+          type: integer
+          format: int64
+          example: 100
+        total_reading_sessions:
+          type: integer
+          format: int64
+          example: 1
   securitySchemes:
     JWT:
       type: http
