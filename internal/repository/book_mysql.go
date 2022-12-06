@@ -14,8 +14,25 @@ type bookMySQlRepository struct {
 	db *sql.DB
 }
 
+// Delete implements BookRepository
+func (r *bookMySQlRepository) Delete(id int64) error {
+	stmt := `
+		DELETE FROM
+			books
+		WHERE
+			id = ?
+	`
+
+	_, err := r.db.Exec(stmt, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // Get implements BookRepository
-func (m *bookMySQlRepository) Get(id int64) (*model.Book, error) {
+func (r *bookMySQlRepository) Get(id int64) (*model.Book, error) {
 	stmt := `
 		SELECT
 			id,
@@ -42,7 +59,7 @@ func (m *bookMySQlRepository) Get(id int64) (*model.Book, error) {
 		LIMIT 1
 	`
 
-	row := m.db.QueryRow(stmt, id)
+	row := r.db.QueryRow(stmt, id)
 
 	book := &model.Book{}
 	err := row.Scan(
@@ -75,7 +92,7 @@ func (m *bookMySQlRepository) Get(id int64) (*model.Book, error) {
 }
 
 // All implements BookModel
-func (m *bookMySQlRepository) All(q string) ([]*model.Book, error) {
+func (r *bookMySQlRepository) All(q string) ([]*model.Book, error) {
 	stmt := `
 		SELECT
 			id,
@@ -101,7 +118,7 @@ func (m *bookMySQlRepository) All(q string) ([]*model.Book, error) {
 			LOWER(title) LIKE CONCAT('%', LOWER(?), '%')
 	`
 
-	rows, err := m.db.Query(stmt, q)
+	rows, err := r.db.Query(stmt, q)
 	if err != nil {
 		return nil, err
 	}

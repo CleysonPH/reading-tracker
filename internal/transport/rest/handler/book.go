@@ -18,6 +18,23 @@ type bookHandler struct {
 	bookRepository repository.BookRepository
 }
 
+// DeleteBook implements BookHandler
+func (h *bookHandler) DeleteBook(w http.ResponseWriter, r *http.Request) {
+	bookId, err := strconv.ParseInt(chi.URLParam(r, "bookId"), 10, 64)
+	if err != nil {
+		sendBadRequest(w, "Invalid book id", err)
+		return
+	}
+
+	err = h.bookRepository.Delete(bookId)
+	if err != nil {
+		sendInternalServerError(w, "Failed to delete book", err)
+		return
+	}
+
+	sendNoContent(w)
+}
+
 // GetBook implements BookHandler
 func (h *bookHandler) GetBook(w http.ResponseWriter, r *http.Request) {
 	bookId, err := strconv.ParseInt(chi.URLParam(r, "bookId"), 10, 64)
