@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS `books` (
     `publisher` VARCHAR(255),
     `published_at` DATE,
     `pages` INT NOT NULL,
-    `read_pages` INT,
+    `read_pages` INT NOT NULL,
     `description` TEXT,
     `reading_status` VARCHAR(7),
     `edition` VARCHAR(255),
