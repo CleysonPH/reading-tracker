@@ -9,6 +9,7 @@ import (
 	"github.com/CleysonPH/reading-tracker/internal/database"
 	"github.com/CleysonPH/reading-tracker/internal/repository"
 	"github.com/CleysonPH/reading-tracker/internal/transport/rest"
+	"github.com/CleysonPH/reading-tracker/internal/transport/rest/handler"
 )
 
 func Run() {
@@ -26,7 +27,7 @@ func Run() {
 	defer db.Close()
 
 	bookRepository := repository.NewBookModel(db)
-	bookHandler := rest.NewBookHandler(bookRepository)
+	bookHandler := handler.NewBookHandler(bookRepository)
 
 	router := rest.NewRouter(bookHandler)
 
