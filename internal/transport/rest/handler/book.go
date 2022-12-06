@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
 	"strconv"
@@ -16,6 +17,28 @@ func NewBookHandler(bookRepository repository.BookRepository) BookHandler {
 
 type bookHandler struct {
 	bookRepository repository.BookRepository
+}
+
+// CreateBook implements BookHandler
+func (h *bookHandler) CreateBook(w http.ResponseWriter, r *http.Request) {
+	bookRequest := dto.BookRequest{}
+	if err := json.NewDecoder(r.Body).Decode(&bookRequest); err != nil {
+		sendBadRequest(w, "Invalid request payload", err)
+		return
+	}
+
+	book := bookRequest.ToBook()
+	bookId, err := h.bookRepository.Create(book)
+	if err != nil {
+		sendInternalServerError(w, "Failed to create book", err)
+		return
+	}
+
+	bookResponse := dto.BookResponse{}
+	bookResponse.FromBook(book)
+	bookResponse.ID = bookId
+
+	sendJSON(w, http.StatusCreated, bookResponse)
 }
 
 // DeleteBook implements BookHandler
