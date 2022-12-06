@@ -15,6 +15,10 @@ func sendJSON(w http.ResponseWriter, status int, body interface{}) {
 	}
 }
 
+func sendNoContent(w http.ResponseWriter) {
+	w.WriteHeader(http.StatusNoContent)
+}
+
 func sendInternalServerError(w http.ResponseWriter, message string, err error) {
 	sendJSON(w, http.StatusInternalServerError, dto.NewErrorResponse(http.StatusInternalServerError, message, err))
 }
