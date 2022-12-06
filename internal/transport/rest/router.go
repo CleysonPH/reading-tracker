@@ -1,9 +1,14 @@
 package rest
 
-import "net/http"
+import (
+	"net/http"
 
-func NewRouter(bookHandler BookHandler) http.Handler {
-	router := http.NewServeMux()
-	router.HandleFunc("/api/v1/books", bookHandler.GetBooks)
+	"github.com/CleysonPH/reading-tracker/internal/transport/rest/handler"
+	"github.com/go-chi/chi/v5"
+)
+
+func NewRouter(bookHandler handler.BookHandler) http.Handler {
+	router := chi.NewRouter()
+	router.Get("/api/v1/books", bookHandler.GetBooks)
 	return router
 }
