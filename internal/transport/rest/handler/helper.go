@@ -18,3 +18,11 @@ func sendJSON(w http.ResponseWriter, status int, body interface{}) {
 func sendInternalServerError(w http.ResponseWriter, message string, err error) {
 	sendJSON(w, http.StatusInternalServerError, dto.NewErrorResponse(http.StatusInternalServerError, message, err))
 }
+
+func sendBadRequest(w http.ResponseWriter, message string, err error) {
+	sendJSON(w, http.StatusBadRequest, dto.NewErrorResponse(http.StatusBadRequest, message, err))
+}
+
+func sendNotFound(w http.ResponseWriter, message string, err error) {
+	sendJSON(w, http.StatusNotFound, dto.NewErrorResponse(http.StatusNotFound, message, err))
+}
