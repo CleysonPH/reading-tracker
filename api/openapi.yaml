@@ -895,7 +895,6 @@ components:
           minimum: 1
       required:
         - title
-        - isbn
         - authors
         - categories
         - language
