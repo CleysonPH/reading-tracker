@@ -9,6 +9,9 @@ import (
 
 func NewRouter(bookHandler handler.BookHandler) http.Handler {
 	router := chi.NewRouter()
+
 	router.Get("/api/v1/books", bookHandler.GetBooks)
+	router.Get("/api/v1/books/{bookId}", bookHandler.GetBook)
+
 	return router
 }
