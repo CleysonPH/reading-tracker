@@ -14,6 +14,52 @@ type bookMySQlRepository struct {
 	db *sql.DB
 }
 
+// Create implements BookRepository
+func (r *bookMySQlRepository) Create(book *model.Book) (int64, error) {
+	stmt := `
+		INSERT INTO books (
+			title,
+			subtitle,
+			isbn,
+			authors,
+			categories,
+			language,
+			publisher,
+			published_at,
+			pages,
+			read_pages,
+			description,
+			reading_status,
+			edition
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, 'to-read', ?)
+	`
+
+	res, err := r.db.Exec(
+		stmt,
+		book.Title,
+		book.Subtitle,
+		book.Isbn,
+		book.Authors,
+		book.Categories,
+		book.Language,
+		book.Publisher,
+		book.PublishedAt,
+		book.Pages,
+		book.Description,
+		book.Edition,
+	)
+	if err != nil {
+		return 0, err
+	}
+
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+
+	return id, nil
+}
+
 // Delete implements BookRepository
 func (r *bookMySQlRepository) Delete(id int64) error {
 	stmt := `
