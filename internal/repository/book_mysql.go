@@ -14,6 +14,66 @@ type bookMySQlRepository struct {
 	db *sql.DB
 }
 
+// Get implements BookRepository
+func (m *bookMySQlRepository) Get(id int64) (*model.Book, error) {
+	stmt := `
+		SELECT
+			id,
+			title,
+			subtitle,
+			isbn,
+			authors,
+			categories,
+			language,
+			cover,
+			publisher,
+			published_at,
+			pages,
+			read_pages,
+			description,
+			reading_status,
+			edition,
+			created_at,
+			updated_at
+		FROM
+			books
+		WHERE
+			id = ?
+		LIMIT 1
+	`
+
+	row := m.db.QueryRow(stmt, id)
+
+	book := &model.Book{}
+	err := row.Scan(
+		&book.ID,
+		&book.Title,
+		&book.Subtitle,
+		&book.Isbn,
+		&book.Authors,
+		&book.Categories,
+		&book.Language,
+		&book.Cover,
+		&book.Publisher,
+		&book.PublishedAt,
+		&book.Pages,
+		&book.ReadPages,
+		&book.Description,
+		&book.ReadingStatus,
+		&book.Edition,
+		&book.CreatedAt,
+		&book.UpdatedAt,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, ErrBookNotFound
+		}
+		return nil, err
+	}
+
+	return book, nil
+}
+
 // All implements BookModel
 func (m *bookMySQlRepository) All(q string) ([]*model.Book, error) {
 	stmt := `
