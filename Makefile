@@ -1,4 +1,4 @@
-dsn=mysql://root:root@tcp(localhost:3306)/reading-tracker?parseTime=true
+dsn="mysql://root:root@tcp(localhost:3306)/reading-tracker?parseTime=true"
 
 .PHONY: migrate-create
 migrate-create:
