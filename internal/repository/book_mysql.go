@@ -1,40 +1,21 @@
-package models
+package repository
 
 import (
 	"database/sql"
-	"time"
+
+	"github.com/CleysonPH/reading-tracker/internal/model"
 )
 
-type Book struct {
-	ID            int64
-	Title         string
-	Subtitle      sql.NullString
-	Isbn          sql.NullString
-	Authors       string
-	Categories    string
-	Language      string
-	Cover         sql.NullString
-	Publisher     sql.NullString
-	PublishedAt   sql.NullTime
-	Pages         int32
-	ReadPages     int32
-	Description   sql.NullString
-	ReadingStatus string
-	Edition       sql.NullInt32
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
+func NewBookModel(db *sql.DB) BookRepository {
+	return &bookMySQlRepository{db}
 }
 
-type BookModel interface {
-	All(q string) ([]*Book, error)
-}
-
-type bookMySQlModel struct {
+type bookMySQlRepository struct {
 	db *sql.DB
 }
 
 // All implements BookModel
-func (m *bookMySQlModel) All(q string) ([]*Book, error) {
+func (m *bookMySQlRepository) All(q string) ([]*model.Book, error) {
 	stmt := `
 		SELECT
 			id,
@@ -66,9 +47,9 @@ func (m *bookMySQlModel) All(q string) ([]*Book, error) {
 	}
 	defer rows.Close()
 
-	books := []*Book{}
+	books := []*model.Book{}
 	for rows.Next() {
-		b := &Book{}
+		b := &model.Book{}
 		err := rows.Scan(
 			&b.ID,
 			&b.Title,
@@ -99,8 +80,4 @@ func (m *bookMySQlModel) All(q string) ([]*Book, error) {
 	}
 
 	return books, nil
-}
-
-func NewBookModel(db *sql.DB) BookModel {
-	return &bookMySQlModel{db}
 }
