@@ -1,7 +1,6 @@
 package rest
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/CleysonPH/reading-tracker/internal/repository"
@@ -21,7 +20,7 @@ func (h *bookHandler) GetBooks(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query().Get("q")
 	books, err := h.bookRepository.All(q)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		sendInternalServerError(w, "Failed to get books", err)
 		return
 	}
 
@@ -30,12 +29,5 @@ func (h *bookHandler) GetBooks(w http.ResponseWriter, r *http.Request) {
 		bookSummaryResponses[i].FromBook(book)
 	}
 
-	body, err := json.Marshal(bookSummaryResponses)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(body)
+	sendJSON(w, http.StatusOK, bookSummaryResponses)
 }
