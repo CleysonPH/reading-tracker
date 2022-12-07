@@ -4,18 +4,20 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/CleysonPH/reading-tracker/internal/repository"
 	"github.com/CleysonPH/reading-tracker/internal/transport/rest/dto"
 )
 
-func NewBookValidator() BookValidator {
-	return &bookValidator{}
+func NewBookValidator(bookRepository repository.BookRepository) BookValidator {
+	return &bookValidator{bookRepository: bookRepository}
 }
 
 type bookValidator struct {
+	bookRepository repository.BookRepository
 }
 
 // ValidateBookCreate implements BookValidator
-func (*bookValidator) ValidateBookCreate(request *dto.BookRequest) error {
+func (v *bookValidator) ValidateBookCreate(request *dto.BookRequest) error {
 	validationError := &ValidationError{}
 
 	// validate title
@@ -39,6 +41,8 @@ func (*bookValidator) ValidateBookCreate(request *dto.BookRequest) error {
 				break
 			}
 		}
+		alreadyInUse := v.bookRepository.ExistsByIsbn(request.Isbn.Value)
+		validationError.AddErrorIf(alreadyInUse, "isbn", "is already in use")
 	}
 
 	// validate authors

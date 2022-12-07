@@ -28,7 +28,7 @@ func Run() {
 	defer db.Close()
 
 	bookRepository := repository.NewBookModel(db)
-	bookValidator := validator.NewBookValidator()
+	bookValidator := validator.NewBookValidator(bookRepository)
 	bookHandler := handler.NewBookHandler(bookRepository, bookValidator)
 
 	router := rest.NewRouter(bookHandler)
