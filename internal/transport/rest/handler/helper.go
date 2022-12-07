@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/CleysonPH/reading-tracker/internal/transport/rest/dto"
+	"github.com/CleysonPH/reading-tracker/internal/transport/rest/validator"
 )
 
 func sendJSON(w http.ResponseWriter, status int, body interface{}) {
@@ -24,6 +25,11 @@ func sendInternalServerError(w http.ResponseWriter, message string, err error) {
 }
 
 func sendBadRequest(w http.ResponseWriter, message string, err error) {
+	ve, ok := err.(*validator.ValidationError)
+	if ok {
+		sendJSON(w, http.StatusBadRequest, dto.NewValidationErrorResponse(message, err, ve.Errors))
+		return
+	}
 	sendJSON(w, http.StatusBadRequest, dto.NewErrorResponse(http.StatusBadRequest, message, err))
 }
 

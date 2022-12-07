@@ -13,6 +13,7 @@ func NewRouter(bookHandler handler.BookHandler) http.Handler {
 	router.Get("/api/v1/books", bookHandler.GetBooks)
 	router.Get("/api/v1/books/{bookId}", bookHandler.GetBook)
 	router.Delete("/api/v1/books/{bookId}", bookHandler.DeleteBook)
+	router.Post("/api/v1/books", bookHandler.CreateBook)
 
 	return router
 }

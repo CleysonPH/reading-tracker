@@ -1,21 +1,57 @@
 package handler
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
 	"strconv"
 
 	"github.com/CleysonPH/reading-tracker/internal/repository"
 	"github.com/CleysonPH/reading-tracker/internal/transport/rest/dto"
+	"github.com/CleysonPH/reading-tracker/internal/transport/rest/validator"
 	"github.com/go-chi/chi/v5"
 )
 
-func NewBookHandler(bookRepository repository.BookRepository) BookHandler {
-	return &bookHandler{bookRepository: bookRepository}
+func NewBookHandler(
+	bookRepository repository.BookRepository,
+	bookValidator validator.BookValidator,
+) BookHandler {
+	return &bookHandler{
+		bookRepository: bookRepository,
+		bookValidator:  bookValidator,
+	}
 }
 
 type bookHandler struct {
 	bookRepository repository.BookRepository
+	bookValidator  validator.BookValidator
+}
+
+// CreateBook implements BookHandler
+func (h *bookHandler) CreateBook(w http.ResponseWriter, r *http.Request) {
+	bookRequest := dto.BookRequest{}
+	if err := json.NewDecoder(r.Body).Decode(&bookRequest); err != nil {
+		sendBadRequest(w, "Invalid request payload", err)
+		return
+	}
+
+	if err := h.bookValidator.ValidateBookCreate(&bookRequest); err != nil {
+		sendBadRequest(w, "Validation failed", err)
+		return
+	}
+
+	book := bookRequest.ToBook()
+	bookId, err := h.bookRepository.Create(book)
+	if err != nil {
+		sendInternalServerError(w, "Failed to create book", err)
+		return
+	}
+
+	bookResponse := dto.BookResponse{}
+	bookResponse.FromBook(book)
+	bookResponse.ID = bookId
+
+	sendJSON(w, http.StatusCreated, bookResponse)
 }
 
 // DeleteBook implements BookHandler

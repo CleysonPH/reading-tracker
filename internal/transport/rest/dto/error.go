@@ -17,3 +17,15 @@ func NewErrorResponse(status int, message string, err error) *ErrorResponse {
 		Cause:   err.Error(),
 	}
 }
+
+type ValidationErrorResponse struct {
+	*ErrorResponse
+	Errors map[string][]string `json:"errors"`
+}
+
+func NewValidationErrorResponse(message string, err error, errors map[string][]string) *ValidationErrorResponse {
+	return &ValidationErrorResponse{
+		ErrorResponse: NewErrorResponse(http.StatusBadRequest, message, err),
+		Errors:        errors,
+	}
+}
