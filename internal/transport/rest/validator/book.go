@@ -16,8 +16,8 @@ type bookValidator struct {
 	bookRepository repository.BookRepository
 }
 
-// ValidateBookCreate implements BookValidator
-func (v *bookValidator) ValidateBookCreate(request *dto.BookRequest) error {
+// validateBook validates common fields for create and update
+func (*bookValidator) validateBook(request *dto.BookRequest) *ValidationError {
 	validationError := &ValidationError{}
 
 	// validate title
@@ -41,8 +41,6 @@ func (v *bookValidator) ValidateBookCreate(request *dto.BookRequest) error {
 				break
 			}
 		}
-		alreadyInUse := v.bookRepository.ExistsByIsbn(request.Isbn.Value)
-		validationError.AddErrorIf(alreadyInUse, "isbn", "is already in use")
 	}
 
 	// validate authors
@@ -87,6 +85,36 @@ func (v *bookValidator) ValidateBookCreate(request *dto.BookRequest) error {
 	// validate edition
 	if request.Edition.Valid() {
 		validationError.AddErrorIf(request.Edition.Value <= 0, "edition", "must be greater than 0")
+	}
+
+	return validationError
+}
+
+// ValidateBookUpdate implements BookValidator
+func (v *bookValidator) ValidateBookUpdate(id int64, request *dto.BookRequest) error {
+	validationError := v.validateBook(request)
+
+	// validate isbn
+	if request.Isbn.Valid() {
+		alreadyInUse := v.bookRepository.ExistsByIsbnAndIdNot(request.Isbn.Value, id)
+		validationError.AddErrorIf(alreadyInUse, "isbn", "is already in use")
+	}
+
+	if validationError.HasErrors() {
+		return validationError
+	}
+
+	return nil
+}
+
+// ValidateBookCreate implements BookValidator
+func (v *bookValidator) ValidateBookCreate(request *dto.BookRequest) error {
+	validationError := v.validateBook(request)
+
+	// validate isbn
+	if request.Isbn.Valid() {
+		alreadyInUse := v.bookRepository.ExistsByIsbn(request.Isbn.Value)
+		validationError.AddErrorIf(alreadyInUse, "isbn", "is already in use")
 	}
 
 	if validationError.HasErrors() {
