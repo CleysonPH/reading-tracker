@@ -81,7 +81,7 @@ func (h *bookHandler) CreateBook(w http.ResponseWriter, r *http.Request) {
 	}
 
 	book := bookRequest.ToBook()
-	bookId, err := h.bookRepository.Create(book)
+	book, err := h.bookRepository.Create(book)
 	if err != nil {
 		sendInternalServerError(w, "Failed to create book", err)
 		return
@@ -89,7 +89,6 @@ func (h *bookHandler) CreateBook(w http.ResponseWriter, r *http.Request) {
 
 	bookResponse := dto.BookResponse{}
 	bookResponse.FromBook(book)
-	bookResponse.ID = bookId
 
 	sendJSON(w, http.StatusCreated, bookResponse)
 }

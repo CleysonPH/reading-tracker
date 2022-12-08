@@ -110,7 +110,7 @@ func (r *bookMySQlRepository) ExistsByIsbn(isbn string) bool {
 }
 
 // Create implements BookRepository
-func (r *bookMySQlRepository) Create(book *model.Book) (int64, error) {
+func (r *bookMySQlRepository) Create(book *model.Book) (*model.Book, error) {
 	stmt := `
 		INSERT INTO books (
 			title,
@@ -144,15 +144,15 @@ func (r *bookMySQlRepository) Create(book *model.Book) (int64, error) {
 		book.Edition,
 	)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
 	id, err := res.LastInsertId()
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
-	return id, nil
+	return r.Get(id)
 }
 
 // Delete implements BookRepository
