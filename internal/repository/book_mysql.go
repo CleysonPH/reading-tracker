@@ -14,6 +14,49 @@ type bookMySQlRepository struct {
 	db *sql.DB
 }
 
+// Update implements BookRepository
+func (r *bookMySQlRepository) Update(book *model.Book) (*model.Book, error) {
+	stmt := `
+		UPDATE
+			books
+		SET
+			title = ?
+			subtitle = ?
+			isbn = ?
+			authors = ?
+			categories = ?
+			language = ?
+			publisher = ?
+			published_at = ?
+			pages = ?
+			description = ?
+			edition = ?
+		WHERE
+			id = ?
+	`
+
+	_, err := r.db.Exec(
+		stmt,
+		book.Title,
+		book.Subtitle,
+		book.Isbn,
+		book.Authors,
+		book.Categories,
+		book.Language,
+		book.Publisher,
+		book.PublishedAt,
+		book.Pages,
+		book.Description,
+		book.Edition,
+		book.ID,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.Get(book.ID)
+}
+
 // ExistsByIsbn implements BookRepository
 func (r *bookMySQlRepository) ExistsByIsbn(isbn string) bool {
 	stmt := `
