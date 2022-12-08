@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -27,6 +28,45 @@ type bookHandler struct {
 	bookValidator  validator.BookValidator
 }
 
+// UpdateBook implements BookHandler
+func (h *bookHandler) UpdateBook(w http.ResponseWriter, r *http.Request) {
+	bookId, err := strconv.ParseInt(chi.URLParam(r, "bookId"), 10, 64)
+	if err != nil {
+		sendBadRequest(w, "Invalid book id", err)
+		return
+	}
+
+	if !h.bookRepository.Exists(bookId) {
+		message := fmt.Sprintf("Book with id %d not found", bookId)
+		sendBadRequest(w, message, errors.New("book not found"))
+		return
+	}
+
+	bookRequest := dto.BookRequest{}
+	if err := json.NewDecoder(r.Body).Decode(&bookRequest); err != nil {
+		sendBadRequest(w, "Invalid request payload", err)
+		return
+	}
+
+	if err := h.bookValidator.ValidateBookUpdate(bookId, &bookRequest); err != nil {
+		sendBadRequest(w, "Validation failed", err)
+		return
+	}
+
+	book := bookRequest.ToBook()
+	book.ID = bookId
+	book, err = h.bookRepository.Update(book)
+	if err != nil {
+		sendInternalServerError(w, "Failed to update book", err)
+		return
+	}
+
+	bookResponse := dto.BookResponse{}
+	bookResponse.FromBook(book)
+
+	sendJSON(w, http.StatusOK, bookResponse)
+}
+
 // CreateBook implements BookHandler
 func (h *bookHandler) CreateBook(w http.ResponseWriter, r *http.Request) {
 	bookRequest := dto.BookRequest{}
@@ -41,7 +81,7 @@ func (h *bookHandler) CreateBook(w http.ResponseWriter, r *http.Request) {
 	}
 
 	book := bookRequest.ToBook()
-	bookId, err := h.bookRepository.Create(book)
+	book, err := h.bookRepository.Create(book)
 	if err != nil {
 		sendInternalServerError(w, "Failed to create book", err)
 		return
@@ -49,7 +89,6 @@ func (h *bookHandler) CreateBook(w http.ResponseWriter, r *http.Request) {
 
 	bookResponse := dto.BookResponse{}
 	bookResponse.FromBook(book)
-	bookResponse.ID = bookId
 
 	sendJSON(w, http.StatusCreated, bookResponse)
 }

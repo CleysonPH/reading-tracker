@@ -14,6 +14,84 @@ type bookMySQlRepository struct {
 	db *sql.DB
 }
 
+// Exists implements BookRepository
+func (r *bookMySQlRepository) Exists(id int64) bool {
+	stmt := `
+		SELECT
+			id
+		FROM
+			books
+		WHERE
+			id = ?
+		LIMIT 1
+	`
+
+	var bookId int64
+	err := r.db.QueryRow(stmt, id).Scan(&bookId)
+	return err == nil && id > 0
+}
+
+// ExistsByIsbnAndIdNot implements BookRepository
+func (r *bookMySQlRepository) ExistsByIsbnAndIdNot(isbn string, id int64) bool {
+	stmt := `
+		SELECT
+			id
+		FROM
+			books
+		WHERE
+			isbn = ?
+			AND id != ?
+		LIMIT 1
+	`
+
+	var bookId int64
+	err := r.db.QueryRow(stmt, isbn, id).Scan(&bookId)
+	return err == nil && id > 0
+}
+
+// Update implements BookRepository
+func (r *bookMySQlRepository) Update(book *model.Book) (*model.Book, error) {
+	stmt := `
+		UPDATE
+			books
+		SET
+			title = ?,
+			subtitle = ?,
+			isbn = ?,
+			authors = ?,
+			categories = ?,
+			language = ?,
+			publisher = ?,
+			published_at = ?,
+			pages = ?,
+			description = ?,
+			edition = ?
+		WHERE
+			id = ?
+	`
+
+	_, err := r.db.Exec(
+		stmt,
+		book.Title,
+		book.Subtitle,
+		book.Isbn,
+		book.Authors,
+		book.Categories,
+		book.Language,
+		book.Publisher,
+		book.PublishedAt,
+		book.Pages,
+		book.Description,
+		book.Edition,
+		book.ID,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.Get(book.ID)
+}
+
 // ExistsByIsbn implements BookRepository
 func (r *bookMySQlRepository) ExistsByIsbn(isbn string) bool {
 	stmt := `
@@ -32,7 +110,7 @@ func (r *bookMySQlRepository) ExistsByIsbn(isbn string) bool {
 }
 
 // Create implements BookRepository
-func (r *bookMySQlRepository) Create(book *model.Book) (int64, error) {
+func (r *bookMySQlRepository) Create(book *model.Book) (*model.Book, error) {
 	stmt := `
 		INSERT INTO books (
 			title,
@@ -66,15 +144,15 @@ func (r *bookMySQlRepository) Create(book *model.Book) (int64, error) {
 		book.Edition,
 	)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
 	id, err := res.LastInsertId()
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
-	return id, nil
+	return r.Get(id)
 }
 
 // Delete implements BookRepository
