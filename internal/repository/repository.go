@@ -12,3 +12,8 @@ type BookRepository interface {
 	ExistsByIsbnAndIdNot(isbn string, id int64) bool
 	Update(book *model.Book) (*model.Book, error)
 }
+
+type ReadingSessionRepository interface {
+	Get(id int64) (*model.ReadingSession, error)
+	Create(readingSession *model.ReadingSession) (*model.ReadingSession, error)
+}
