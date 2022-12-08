@@ -24,3 +24,12 @@ type Book struct {
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 }
+
+type ReadingSession struct {
+	ID        int64
+	ReadPages int32
+	Date      time.Time
+	BookID    int64
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
