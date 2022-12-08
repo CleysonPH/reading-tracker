@@ -72,6 +72,23 @@ func (n *NullTime) UnmarshalJSON(b []byte) error {
 	return json.Unmarshal(b, &n.Value)
 }
 
+type Date struct {
+	Value time.Time
+}
+
+func (d Date) MarshalJSON() ([]byte, error) {
+	return json.Marshal(d.Value.Format("2006-01-02"))
+}
+
+func (d *Date) UnmarshalJSON(b []byte) error {
+	date, err := time.Parse("2006-01-02", strings.Replace(string(b), "\"", "", -1))
+	if err != nil {
+		return err
+	}
+	d.Value = date
+	return nil
+}
+
 type NullDate struct {
 	Value time.Time
 }
