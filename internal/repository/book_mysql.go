@@ -14,6 +14,23 @@ type bookMySQlRepository struct {
 	db *sql.DB
 }
 
+// Exists implements BookRepository
+func (r *bookMySQlRepository) Exists(id int64) bool {
+	stmt := `
+		SELECT
+			id
+		FROM
+			books
+		WHERE
+			id = ?
+		LIMIT 1
+	`
+
+	var bookId int64
+	err := r.db.QueryRow(stmt, id).Scan(&bookId)
+	return err == nil && id > 0
+}
+
 // ExistsByIsbnAndIdNot implements BookRepository
 func (r *bookMySQlRepository) ExistsByIsbnAndIdNot(isbn string, id int64) bool {
 	stmt := `
