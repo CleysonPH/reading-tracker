@@ -8,5 +8,6 @@ type BookRepository interface {
 	Delete(id int64) error
 	Create(book *model.Book) (int64, error)
 	ExistsByIsbn(isbn string) bool
+	ExistsByIsbnAndIdNot(isbn string, id int64) bool
 	Update(book *model.Book) (*model.Book, error)
 }
