@@ -55,16 +55,16 @@ func (r *bookMySQlRepository) Update(book *model.Book) (*model.Book, error) {
 		UPDATE
 			books
 		SET
-			title = ?
-			subtitle = ?
-			isbn = ?
-			authors = ?
-			categories = ?
-			language = ?
-			publisher = ?
-			published_at = ?
-			pages = ?
-			description = ?
+			title = ?,
+			subtitle = ?,
+			isbn = ?,
+			authors = ?,
+			categories = ?,
+			language = ?,
+			publisher = ?,
+			published_at = ?,
+			pages = ?,
+			description = ?,
 			edition = ?
 		WHERE
 			id = ?
