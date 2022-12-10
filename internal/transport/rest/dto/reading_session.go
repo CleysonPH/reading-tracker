@@ -12,6 +12,7 @@ type ReadingSessionRequest struct {
 
 func (r *ReadingSessionRequest) ToReadingSession() *model.ReadingSession {
 	return &model.ReadingSession{
+		BookID:    r.BookID,
 		ReadPages: r.ReadPages,
 		Date:      r.Date.Value,
 	}

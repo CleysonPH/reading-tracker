@@ -34,7 +34,7 @@ func (v *readingSessionValidator) ValidateReadingSessionCreate(request *dto.Read
 
 	// Validate Date
 	validationError.AddErrorIf(request.Date.Value.IsZero(), "date", "must be a valid date")
-	validationError.AddErrorIf(time.Now().Before(request.Date.Value), "date", "must be a date in the past")
+	validationError.AddErrorIf(request.Date.Value.After(time.Now()), "date", "must not be a future date")
 
 	if validationError.HasErrors() {
 		return validationError
