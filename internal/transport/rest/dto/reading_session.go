@@ -7,6 +7,7 @@ import (
 type ReadingSessionRequest struct {
 	ReadPages int32 `json:"read_pages"`
 	Date      Date  `json:"date"`
+	BookID    int64 `json:"-"`
 }
 
 func (r *ReadingSessionRequest) ToReadingSession() *model.ReadingSession {
