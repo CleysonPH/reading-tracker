@@ -11,6 +11,7 @@ type BookRepository interface {
 	ExistsByIsbn(isbn string) bool
 	ExistsByIsbnAndIdNot(isbn string, id int64) bool
 	Update(book *model.Book) (*model.Book, error)
+	UpdateReadPagesAndReadingStatus(bookID int64, readPages int32, readingStatus string) error
 }
 
 type ReadingSessionRepository interface {

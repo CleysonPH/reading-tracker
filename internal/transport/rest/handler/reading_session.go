@@ -39,9 +39,13 @@ func (h *readingSessionHandler) CreateReadingSession(w http.ResponseWriter, r *h
 		return
 	}
 
-	if !h.bookRepository.Exists(bookId) {
-		sendNotFound(w, fmt.Sprintf("Book with id %d not found", bookId), errors.New("book not found"))
-		return
+	book, err := h.bookRepository.Get(bookId)
+	if err != nil {
+		if errors.Is(err, repository.ErrBookNotFound) {
+			sendNotFound(w, fmt.Sprintf("Book with id %d not found", bookId), err)
+			return
+		}
+		sendInternalServerError(w, "Failed to get book", err)
 	}
 
 	readingSessionRequest := dto.ReadingSessionRequest{}
@@ -60,6 +64,18 @@ func (h *readingSessionHandler) CreateReadingSession(w http.ResponseWriter, r *h
 	readingSession, err = h.readingSessionRepository.Create(readingSession)
 	if err != nil {
 		sendInternalServerError(w, "Failed to create reading session", err)
+		return
+	}
+
+	readPages := book.ReadPages + readingSessionRequest.ReadPages
+	var readingStatus string
+	if readPages == book.Pages {
+		readingStatus = "read"
+	} else {
+		readingStatus = "reading"
+	}
+	if err := h.bookRepository.UpdateReadPagesAndReadingStatus(bookId, readPages, readingStatus); err != nil {
+		sendInternalServerError(w, "Failed to update book read pages", err)
 		return
 	}
 
