@@ -14,6 +14,18 @@ type readingSessionRepository struct {
 	db *sql.DB
 }
 
+// Delete implements ReadingSessionRepository
+func (r *readingSessionRepository) Delete(id int64) error {
+	stmt := `DELETE FROM reading_sessions WHERE id = ?`
+
+	_, err := r.db.Exec(stmt, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // Create implements ReadingSessionRepository
 func (r *readingSessionRepository) Create(
 	readingSession *model.ReadingSession,

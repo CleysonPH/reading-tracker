@@ -173,12 +173,7 @@ func (r *bookMySQlRepository) Create(book *model.Book) (*model.Book, error) {
 
 // Delete implements BookRepository
 func (r *bookMySQlRepository) Delete(id int64) error {
-	stmt := `
-		DELETE FROM
-			books
-		WHERE
-			id = ?
-	`
+	stmt := `DELETE FROM books WHERE id = ?`
 
 	_, err := r.db.Exec(stmt, id)
 	if err != nil {

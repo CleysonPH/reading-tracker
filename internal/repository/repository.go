@@ -17,4 +17,5 @@ type BookRepository interface {
 type ReadingSessionRepository interface {
 	Get(id int64) (*model.ReadingSession, error)
 	Create(readingSession *model.ReadingSession) (*model.ReadingSession, error)
+	Delete(id int64) error
 }
