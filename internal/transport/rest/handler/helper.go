@@ -16,6 +16,10 @@ func sendJSON(w http.ResponseWriter, status int, body interface{}) {
 	}
 }
 
+func sendCreated(w http.ResponseWriter, body interface{}) {
+	sendJSON(w, http.StatusCreated, body)
+}
+
 func sendNoContent(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusNoContent)
 }

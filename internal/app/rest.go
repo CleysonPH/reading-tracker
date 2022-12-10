@@ -41,7 +41,11 @@ func Run() {
 	bookValidator := validator.NewBookValidator(bookRepository)
 	bookHandler := handler.NewBookHandler(bookRepository, bookValidator)
 
-	router := rest.NewRouter(bookHandler)
+	readingSessionRepository := repository.NewReadingSessionModel(db)
+	readingSessionValidator := validator.NewReadingSessionValidator(bookRepository, readingSessionRepository)
+	readingSessionHandler := handler.NewReadingSessionHandler(bookRepository, readingSessionValidator, readingSessionRepository)
+
+	router := rest.NewRouter(bookHandler, readingSessionHandler)
 	router = loggerMiddleware.Use(router)
 
 	srv := &http.Server{

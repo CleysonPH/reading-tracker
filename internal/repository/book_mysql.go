@@ -14,6 +14,22 @@ type bookMySQlRepository struct {
 	db *sql.DB
 }
 
+// UpdateReadPages implements BookRepository
+func (r *bookMySQlRepository) UpdateReadPagesAndReadingStatus(bookID int64, readPages int32, readingStatus string) error {
+	stmt := `
+		UPDATE
+			books
+		SET
+			read_pages = ?,
+			reading_status = ?
+		WHERE
+			id = ?
+	`
+
+	_, err := r.db.Exec(stmt, readPages, readingStatus, bookID)
+	return err
+}
+
 // Exists implements BookRepository
 func (r *bookMySQlRepository) Exists(id int64) bool {
 	stmt := `

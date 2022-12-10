@@ -9,3 +9,7 @@ type BookHandler interface {
 	CreateBook(w http.ResponseWriter, r *http.Request)
 	UpdateBook(w http.ResponseWriter, r *http.Request)
 }
+
+type ReadingSessionHandler interface {
+	CreateReadingSession(w http.ResponseWriter, r *http.Request)
+}
