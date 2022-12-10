@@ -17,5 +17,4 @@ type BookRepository interface {
 type ReadingSessionRepository interface {
 	Get(id int64) (*model.ReadingSession, error)
 	Create(readingSession *model.ReadingSession) (*model.ReadingSession, error)
-	GetTotalReadPagesByBookID(bookID int64) (int32, error)
 }

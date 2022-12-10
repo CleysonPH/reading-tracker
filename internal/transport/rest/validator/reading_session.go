@@ -29,8 +29,7 @@ func (v *readingSessionValidator) ValidateReadingSessionCreate(request *dto.Read
 	// Validate ReadPages
 	validationError.AddErrorIf(request.ReadPages <= 0, "read_pages", "must be greater than 0")
 	book, _ := v.bookRepository.Get(request.BookID)
-	totalReadPages, _ := v.readingSessionRepository.GetTotalReadPagesByBookID(request.BookID)
-	validationError.AddErrorIf(totalReadPages+request.ReadPages > book.Pages, "read_pages", "must not exceed the total number of pages of the book")
+	validationError.AddErrorIf(book.ReadPages+request.ReadPages > book.Pages, "read_pages", "must not exceed the total number of pages of the book")
 
 	// Validate Date
 	validationError.AddErrorIf(request.Date.Value.IsZero(), "date", "must be a valid date")

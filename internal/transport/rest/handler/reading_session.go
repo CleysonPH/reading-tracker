@@ -79,5 +79,7 @@ func (h *readingSessionHandler) CreateReadingSession(w http.ResponseWriter, r *h
 		return
 	}
 
-	sendCreated(w, readingSession)
+	readingSessionResponse := dto.ReadingSessionResponse{}
+	readingSessionResponse.FromReadingSession(readingSession)
+	sendCreated(w, readingSessionResponse)
 }

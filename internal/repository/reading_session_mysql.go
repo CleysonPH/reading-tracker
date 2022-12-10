@@ -14,25 +14,6 @@ type readingSessionRepository struct {
 	db *sql.DB
 }
 
-// GetTotalReadPagesByBookID implements ReadingSessionRepository
-func (r *readingSessionRepository) GetTotalReadPagesByBookID(bookID int64) (int32, error) {
-	stmt := `
-		SELECT
-			SUM(read_pages)
-		FROM
-			reading_sessions
-		WHERE
-			book_id = ?
-	`
-
-	var totalReadPages int32
-	err := r.db.QueryRow(stmt, bookID).Scan(&totalReadPages)
-	if err != nil {
-		return 0, err
-	}
-	return totalReadPages, nil
-}
-
 // Create implements ReadingSessionRepository
 func (r *readingSessionRepository) Create(
 	readingSession *model.ReadingSession,
