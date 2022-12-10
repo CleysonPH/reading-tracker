@@ -31,6 +31,66 @@ type readingSessionHandler struct {
 	readingSessionRepository repository.ReadingSessionRepository
 }
 
+// DeleteReadingSession implements ReadingSessionHandler
+func (h *readingSessionHandler) DeleteReadingSession(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("DeleteReadingSession")
+	readingSessionId, err := strconv.ParseInt(chi.URLParam(r, "readingSessionId"), 10, 64)
+	if err != nil {
+		sendBadRequest(w, "Invalid reading session id", err)
+		return
+	}
+
+	readingSession, err := h.readingSessionRepository.Get(readingSessionId)
+	if err != nil {
+		if errors.Is(err, repository.ErrReadingSessionNotFound) {
+			sendNotFound(w, fmt.Sprintf("Reading session with id %d not found", readingSessionId), err)
+			return
+		}
+		sendInternalServerError(w, "Failed to get reading session", err)
+		return
+	}
+
+	bookId, err := strconv.ParseInt(chi.URLParam(r, "bookId"), 10, 64)
+	if err != nil {
+		sendBadRequest(w, "Invalid book id", err)
+		return
+	}
+	book, err := h.bookRepository.Get(bookId)
+	if err != nil {
+		if errors.Is(err, repository.ErrBookNotFound) {
+			sendNotFound(w, fmt.Sprintf("Book with id %d not found", readingSession.BookID), err)
+			return
+		}
+	}
+
+	if bookId != readingSession.BookID {
+		sendBadRequest(w, "Reading session does not belong to book", errors.New("reading session does not belong to book"))
+		return
+	}
+
+	if err := h.readingSessionRepository.Delete(readingSessionId); err != nil {
+		sendInternalServerError(w, "Failed to delete reading session", err)
+		return
+	}
+
+	readPages := book.ReadPages - readingSession.ReadPages
+	var readingStatus string
+	if readPages == 0 {
+		readingStatus = "to-read"
+	} else if readPages == book.Pages {
+		readingStatus = "read"
+	} else {
+		readingStatus = "reading"
+	}
+	err = h.bookRepository.UpdateReadPagesAndReadingStatus(bookId, readPages, readingStatus)
+	if err != nil {
+		sendInternalServerError(w, "Failed to update book read pages", err)
+		return
+	}
+
+	sendNoContent(w)
+}
+
 // CreateReadingSession implements ReadingSessionHandler
 func (h *readingSessionHandler) CreateReadingSession(w http.ResponseWriter, r *http.Request) {
 	bookId, err := strconv.ParseInt(chi.URLParam(r, "bookId"), 10, 64)
