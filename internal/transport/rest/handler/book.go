@@ -64,7 +64,7 @@ func (h *bookHandler) UpdateBook(w http.ResponseWriter, r *http.Request) {
 	bookResponse := dto.BookResponse{}
 	bookResponse.FromBook(book)
 
-	sendJSON(w, http.StatusOK, bookResponse)
+	sendOk(w, bookResponse)
 }
 
 // CreateBook implements BookHandler
@@ -90,7 +90,7 @@ func (h *bookHandler) CreateBook(w http.ResponseWriter, r *http.Request) {
 	bookResponse := dto.BookResponse{}
 	bookResponse.FromBook(book)
 
-	sendJSON(w, http.StatusCreated, bookResponse)
+	sendCreated(w, bookResponse)
 }
 
 // DeleteBook implements BookHandler
@@ -131,7 +131,7 @@ func (h *bookHandler) GetBook(w http.ResponseWriter, r *http.Request) {
 	bookResponse := dto.BookResponse{}
 	bookResponse.FromBook(book)
 
-	sendJSON(w, http.StatusOK, bookResponse)
+	sendOk(w, bookResponse)
 }
 
 // GetBooks implements BookHandler
@@ -148,5 +148,5 @@ func (h *bookHandler) GetBooks(w http.ResponseWriter, r *http.Request) {
 		bookSummaryResponses[i].FromBook(book)
 	}
 
-	sendJSON(w, http.StatusOK, bookSummaryResponses)
+	sendOk(w, bookSummaryResponses)
 }

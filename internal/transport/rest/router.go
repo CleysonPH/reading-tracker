@@ -22,6 +22,7 @@ func NewRouter(
 
 	// Reading sessions
 	router.Post("/api/v1/books/{bookId}/reading-sessions", readingSessionHandler.CreateReadingSession)
+	router.Get("/api/v1/books/{bookId}/reading-sessions", readingSessionHandler.GetReadingSessionsByBookID)
 	router.Delete("/api/v1/books/{bookId}/reading-sessions/{readingSessionId}", readingSessionHandler.DeleteReadingSession)
 
 	return router

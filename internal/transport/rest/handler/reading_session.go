@@ -31,9 +31,35 @@ type readingSessionHandler struct {
 	readingSessionRepository repository.ReadingSessionRepository
 }
 
+// GetReadingSessionsByBookID implements ReadingSessionHandler
+func (h *readingSessionHandler) GetReadingSessionsByBookID(w http.ResponseWriter, r *http.Request) {
+	bookId, err := strconv.ParseInt(chi.URLParam(r, "bookId"), 10, 64)
+	if err != nil {
+		sendBadRequest(w, "Invalid book id", err)
+		return
+	}
+
+	if !h.bookRepository.Exists(bookId) {
+		sendNotFound(w, fmt.Sprintf("Book with id %d not found", bookId), errors.New("book not found"))
+		return
+	}
+
+	readingSessions, err := h.readingSessionRepository.AllByBookID(bookId)
+	if err != nil {
+		sendInternalServerError(w, "Failed to get reading sessions", err)
+		return
+	}
+
+	readingSessionsResponse := make([]dto.ReadingSessionResponse, len(readingSessions))
+	for i, readingSession := range readingSessions {
+		readingSessionsResponse[i].FromReadingSession(readingSession)
+	}
+
+	sendOk(w, readingSessionsResponse)
+}
+
 // DeleteReadingSession implements ReadingSessionHandler
 func (h *readingSessionHandler) DeleteReadingSession(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("DeleteReadingSession")
 	readingSessionId, err := strconv.ParseInt(chi.URLParam(r, "readingSessionId"), 10, 64)
 	if err != nil {
 		sendBadRequest(w, "Invalid reading session id", err)
