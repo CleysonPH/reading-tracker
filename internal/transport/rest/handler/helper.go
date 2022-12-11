@@ -16,6 +16,10 @@ func sendJSON(w http.ResponseWriter, status int, body interface{}) {
 	}
 }
 
+func sendOk(w http.ResponseWriter, body interface{}) {
+	sendJSON(w, http.StatusOK, body)
+}
+
 func sendCreated(w http.ResponseWriter, body interface{}) {
 	sendJSON(w, http.StatusCreated, body)
 }

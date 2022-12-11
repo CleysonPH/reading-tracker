@@ -14,6 +14,49 @@ type readingSessionRepository struct {
 	db *sql.DB
 }
 
+// AllByBookID implements ReadingSessionRepository
+func (r *readingSessionRepository) AllByBookID(bookID int64) ([]*model.ReadingSession, error) {
+	stmt := `
+		SELECT
+			id,
+			read_pages,
+			date,
+			book_id,
+			created_at,
+			updated_at
+		FROM
+			reading_sessions
+		WHERE
+			book_id = ?
+	`
+
+	rows, err := r.db.Query(stmt, bookID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var readingSessions []*model.ReadingSession
+	for rows.Next() {
+		rs := &model.ReadingSession{}
+		err := rows.Scan(
+			&rs.ID,
+			&rs.ReadPages,
+			&rs.Date,
+			&rs.BookID,
+			&rs.CreatedAt,
+			&rs.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		readingSessions = append(readingSessions, rs)
+	}
+
+	return readingSessions, nil
+}
+
 // Delete implements ReadingSessionRepository
 func (r *readingSessionRepository) Delete(id int64) error {
 	stmt := `DELETE FROM reading_sessions WHERE id = ?`

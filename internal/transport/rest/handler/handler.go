@@ -13,4 +13,5 @@ type BookHandler interface {
 type ReadingSessionHandler interface {
 	CreateReadingSession(w http.ResponseWriter, r *http.Request)
 	DeleteReadingSession(w http.ResponseWriter, r *http.Request)
+	GetReadingSessionsByBookID(w http.ResponseWriter, r *http.Request)
 }

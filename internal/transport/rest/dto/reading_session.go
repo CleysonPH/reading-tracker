@@ -1,6 +1,8 @@
 package dto
 
 import (
+	"time"
+
 	"github.com/CleysonPH/reading-tracker/internal/model"
 )
 
@@ -19,12 +21,12 @@ func (r *ReadingSessionRequest) ToReadingSession() *model.ReadingSession {
 }
 
 type ReadingSessionResponse struct {
-	ID        int64 `json:"id"`
-	ReadPages int32 `json:"read_pages"`
-	Date      Date  `json:"date"`
-	BookID    int64 `json:"book_id"`
-	CreatedAt Date  `json:"created_at"`
-	UpdatedAt Date  `json:"updated_at"`
+	ID        int64     `json:"id"`
+	ReadPages int32     `json:"read_pages"`
+	Date      Date      `json:"date"`
+	BookID    int64     `json:"book_id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 func (r *ReadingSessionResponse) FromReadingSession(readingSession *model.ReadingSession) {
@@ -32,6 +34,6 @@ func (r *ReadingSessionResponse) FromReadingSession(readingSession *model.Readin
 	r.ReadPages = readingSession.ReadPages
 	r.Date = Date{Value: readingSession.Date}
 	r.BookID = readingSession.BookID
-	r.CreatedAt = Date{Value: readingSession.CreatedAt}
-	r.UpdatedAt = Date{Value: readingSession.UpdatedAt}
+	r.CreatedAt = readingSession.CreatedAt
+	r.UpdatedAt = readingSession.UpdatedAt
 }
